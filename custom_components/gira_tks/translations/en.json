@@ -35,7 +35,11 @@
           "sip_port": "Local SIP port",
           "media_port": "Local H.264 RTP port",
           "auto_answer": "Answer calls automatically",
-          "tks_door_opener_enabled": "Show switching buttons: door opener, light, switching action of function key 1 (encrypted SIP channel; the SIP account must be allowed to switch by the gateway)"
+          "tks_door_opener_enabled": "Show switching buttons: door opener, light, switching action of function key 1 (encrypted SIP channel; the SIP account must be allowed to switch by the gateway)",
+          "camera_channels": "Number of camera channels for the preview (CC-1 … CC-n)"
+        },
+        "data_description": {
+          "camera_channels": "With several door stations/cameras, enter how many camera channels the gateway has. From 2 on, an extra button \"Start camera preview (camera n)\" is created per channel; the preview camera shows the channel last started."
         }
       }
     },
@@ -63,6 +67,9 @@
       },
       "start_camera_preview": {
         "name": "Start camera preview"
+      },
+      "start_camera_preview_channel": {
+        "name": "Start camera preview (camera {channel})"
       },
       "stop_camera_preview": {
         "name": "Stop camera preview"

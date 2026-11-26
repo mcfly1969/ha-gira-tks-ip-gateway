@@ -128,6 +128,7 @@ shown in each entity's settings.
 | Door station (camera preview) | camera | On-demand camera preview. |
 | Answer call, Decline / end call | button | Call control. |
 | Start / stop camera preview | button | Camera preview (stops by itself after 30 s). |
+| Start camera preview (camera n) | button | Only with option *Number of camera channels* ≥ 2: preview of camera channel n (SIP target `CC-n`). The preview camera shows the channel started last. |
 | Restart SIP connection | button | Re-register the SIP participant. |
 | Door opener, Light, Switching action | button | Only with the switching buttons option enabled. |
 
