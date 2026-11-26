@@ -6,7 +6,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, sip_updated_signal
+from .const import CONF_CAMERA_CHANNELS, DEFAULT_CAMERA_CHANNELS, DOMAIN, MAX_CAMERA_CHANNELS, sip_updated_signal
 from .sip import SipClient
 
 _PRESS_ERRORS = (RuntimeError, TimeoutError, OSError, ValueError, IndexError)
@@ -31,6 +31,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
             StartCameraPreviewButton(entry, sip),
             StopCameraPreviewButton(entry, sip),
             RestartSipButton(entry, sip),
+        ]
+        channels = int(entry.options.get(CONF_CAMERA_CHANNELS, DEFAULT_CAMERA_CHANNELS) or 1)
+        entities += [
+            StartCameraPreviewButton(entry, sip, channel)
+            for channel in range(2, min(channels, MAX_CAMERA_CHANNELS) + 1)
         ]
         if runtime.get("sip_switching"):
             entities += [SipDoorOpenerButton(entry, sip), SipLightButton(entry, sip), SipSwitchingActionButton(entry, sip)]
@@ -108,14 +113,22 @@ class RestartSipButton(CallButton):
 
 
 class StartCameraPreviewButton(CallButton):
+    """Start the camera preview. Without channel: camera channel 1 (unchanged entity)."""
+
     _attr_translation_key = "start_camera_preview"
     _attr_icon = "mdi:camera-wireless"
 
-    def __init__(self, entry, sip):
-        super().__init__(entry, sip, "start_camera_preview")
+    def __init__(self, entry, sip, channel: int | None = None):
+        self._channel = channel
+        if channel is None:
+            super().__init__(entry, sip, "start_camera_preview")
+        else:
+            super().__init__(entry, sip, f"start_camera_preview_{channel}")
+            self._attr_translation_key = "start_camera_preview_channel"
+            self._attr_translation_placeholders = {"channel": str(channel)}
 
     async def async_press(self) -> None:
-        await self._run_action(self.sip.start_camera_preview)
+        await self._run_action(lambda: self.sip.start_camera_preview(self._channel or 1))
 
 
 class StopCameraPreviewButton(CallButton):

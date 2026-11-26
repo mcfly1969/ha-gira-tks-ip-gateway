@@ -134,6 +134,7 @@ Entität.
 | Türstation (Kameravorschau) | Kamera | Kameravorschau auf Knopfdruck. |
 | Anruf annehmen, Anruf ablehnen / beenden | Button | Rufsteuerung. |
 | Kameravorschau starten / beenden | Button | Kameravorschau (endet nach 30 s von selbst). |
+| Kameravorschau starten (Kamera n) | Button | Nur mit Option *Anzahl Kamerakanäle* ≥ 2: Vorschau von Kamerakanal n (SIP-Ziel `CC-n`). Die Vorschau-Kamera zeigt den zuletzt gestarteten Kanal. |
 | SIP-Verbindung neu starten | Button | SIP-Teilnehmer neu anmelden. |
 | Türöffner, Licht, Schalthandlung | Button | Nur mit eingeschalteter Option für die Schaltbuttons. |
 

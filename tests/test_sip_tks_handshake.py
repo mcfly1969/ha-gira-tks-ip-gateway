@@ -462,6 +462,41 @@ class TestMediaRebind(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(any(line.startswith("INVITE ") for line in gw.other_requests))
 
 
+class TestPreviewChannel(unittest.IsolatedAsyncioTestCase):
+    async def test_channel_selects_sip_target(self):
+        client, gw = make_client()
+        client._registered = True
+        targets = []
+
+        async def no_media(payload_types):
+            return None
+
+        async def fake_invite(auth=""):
+            targets.append((client.preview_dialog.request_uri, client.preview_dialog.to_header))
+            raise RuntimeError("stop after INVITE")
+
+        with mock.patch.object(client, "_open_media", no_media), \
+                mock.patch.object(client, "_close_media", lambda: None), \
+                mock.patch.object(client, "_send_preview_invite", fake_invite):
+            with self.assertRaises(RuntimeError):
+                await client.start_camera_preview(3)
+            with self.assertRaises(RuntimeError):
+                await client.start_camera_preview()
+        self.assertEqual(client.preview_channel, 3)
+        self.assertEqual(targets[0][0], f"sip:CC-3@{client.gateway}")
+        self.assertEqual(targets[0][1], f"<sip:CC-3@{client.gateway}>")
+        self.assertEqual(targets[1][0], f"sip:CC-3@{client.gateway}")   # without channel: last one
+
+    async def test_default_channel_is_one(self):
+        client, gw = make_client()
+        self.assertEqual(client.preview_channel, 1)
+
+    async def test_invalid_channel_is_rejected(self):
+        client, gw = make_client()
+        with self.assertRaises(ValueError):
+            await client.start_camera_preview(0)
+
+
 class TestMessageErrors(unittest.IsolatedAsyncioTestCase):
     async def test_failing_message_does_not_stop_processing_or_registration(self):
         client, gw = make_client()

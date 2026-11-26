@@ -27,6 +27,9 @@ from .const import (
     CONF_SIP_PORT,
     CONF_SIP_USERNAME,
     CONF_SIP_SWITCHING,
+    CONF_CAMERA_CHANNELS,
+    DEFAULT_CAMERA_CHANNELS,
+    MAX_CAMERA_CHANNELS,
     CONF_USERNAME,
     DEFAULT_MEDIA_PORT,
     DEFAULT_LISTEN_PORT,
@@ -180,6 +183,8 @@ class GiraTksOptionsFlow(config_entries.OptionsFlow):
                 vol.All(int, vol.Range(min=1024, max=65534)),
             vol.Required(CONF_AUTO_ANSWER, default=current.get(CONF_AUTO_ANSWER, False)): bool,
             vol.Required(CONF_SIP_SWITCHING, default=current.get(CONF_SIP_SWITCHING, False)): bool,
+            vol.Required(CONF_CAMERA_CHANNELS, default=current.get(CONF_CAMERA_CHANNELS, DEFAULT_CAMERA_CHANNELS)):
+                vol.All(int, vol.Range(min=1, max=MAX_CAMERA_CHANNELS)),
         })
         return self.async_show_form(step_id="init", data_schema=schema, errors=errors)
 

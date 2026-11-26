@@ -328,6 +328,7 @@ class SipClient(asyncio.DatagramProtocol):
         self.runtime = SipRuntime()
         self.call: tuple[SipMessage, tuple[str, int], int | None, str] | None = None
         self.preview_dialog: SipPreviewDialog | None = None
+        self.preview_channel = 1
         self._response_waiters: dict[tuple[int, str], asyncio.Future[SipMessage]] = {}
         self._preview_task: asyncio.Task | None = None
         self._preview_lock = asyncio.Lock()
@@ -972,8 +973,21 @@ class SipClient(asyncio.DatagramProtocol):
         self.send(request)
         return request
 
-    async def start_camera_preview(self) -> None:
+    async def start_camera_preview(self, channel: int | None = None) -> None:
+        """Start the independent camera preview.
+
+        ``channel`` selects the gateway camera channel (SIP target ``CC-<channel>``).
+        Without a channel the last used one is taken (default 1). If a preview of
+        another channel is running, it is stopped first.
+        """
         async with self._preview_lock:
+            if channel is not None:
+                channel = int(channel)
+                if not 1 <= channel <= 99:
+                    raise ValueError("Camera channel must be between 1 and 99")
+                if self.preview_dialog and channel != self.preview_channel:
+                    await self._stop_camera_preview()
+                self.preview_channel = channel
             await self._start_camera_preview()
 
     async def _start_camera_preview(self) -> None:
@@ -996,12 +1010,13 @@ class SipClient(asyncio.DatagramProtocol):
             self._close_media()
             raise RuntimeError("A TKS call started while the camera preview was starting")
 
-        request_uri = f"sip:CC-1@{self.gateway}"
+        target = f"CC-{self.preview_channel}"
+        request_uri = f"sip:{target}@{self.gateway}"
         local_tag = secrets.token_hex(8)
         call_id = f"{secrets.token_hex(12)}@{self.local_ip}"
         branch = f"z9hG4bK{secrets.token_hex(8)}"
         from_header = f"<sip:{self.username}@{self.gateway}>;tag={local_tag}"
-        to_header = f"<sip:CC-1@{self.gateway}>"
+        to_header = f"<sip:{target}@{self.gateway}>"
         started_dialog = SipPreviewDialog(request_uri, call_id, local_tag, branch, from_header, to_header)
         self.preview_dialog = started_dialog
         self.media_active = True

@@ -36,6 +36,9 @@ ATTR_RECORD = "record"
 ATTR_RECEIVED_AT = "received_at"
 
 CONF_SIP_SWITCHING = "tks_door_opener_enabled"
+CONF_CAMERA_CHANNELS = "camera_channels"
+DEFAULT_CAMERA_CHANNELS = 1
+MAX_CAMERA_CHANNELS = 8
 
 EVENT_KEY_EVENT = "gira_tks_key_event"
 EVENT_DOOR_CALL = "gira_tks_door_call"
